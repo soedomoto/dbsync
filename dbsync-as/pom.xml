@@ -11,7 +11,7 @@
   <dependencies>
   	<dependency>
 		<groupId>com.soedomoto</groupId>
-		<artifactId>dbsync-thrift</artifactId>
+		<artifactId>dbsync-api</artifactId>
 		<version>${project.version}</version>
 	</dependency>
 	<dependency>
