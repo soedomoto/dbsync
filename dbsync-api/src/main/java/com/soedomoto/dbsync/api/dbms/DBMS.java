@@ -1,4 +1,4 @@
-package com.soedomoto.dbsync.thrift;
+package com.soedomoto.dbsync.api.dbms;
 
 import java.sql.SQLException;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.soedomoto.dbsync.thrift;
+package com.soedomoto.dbsync.provider;
 
 import java.net.SocketAddress;
 import java.sql.Connection;
@@ -11,26 +11,25 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.soedomoto.dbsync.service.DBSyncDaemon;
-import com.soedomoto.dbsync.thrift.Column;
-import com.soedomoto.dbsync.thrift.DBMS;
+import com.soedomoto.dbsync.api.dbms.AbstractDBMSClient;
+import com.soedomoto.dbsync.api.dbms.Column;
 
-public class MySQL implements DBMS, DBSyncDaemon.Client {
+public class MySQL extends AbstractDBMSClient {
 	private static Logger log = LoggerFactory.getLogger(MySQL.class);
 	
 	private String url;
 	private Connection connection;
 	private Map<SocketAddress, Map<String, Integer>> offset = new HashMap<>();
 	private SocketAddress currentClient;
-
-	public MySQL(String url, String username, String password) throws ClassNotFoundException, SQLException {
+	
+	@Override
+	public void connect(String url, String username, String password, Properties prop) throws SQLException {
 		this.url = url;
-		
-		Class.forName("com.mysql.jdbc.Driver");
 		this.connection = DriverManager.getConnection(url, username, password);
 	}
 	

@@ -1,4 +1,4 @@
-package com.soedomoto.dbsync.thrift;
+package com.soedomoto.dbsync.api.dbms;
 
 import com.facebook.swift.codec.ThriftConstructor;
 import com.facebook.swift.codec.ThriftField;

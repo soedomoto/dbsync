@@ -1,15 +1,12 @@
 package com.soedomoto.dbsync.thrift;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
-import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ServerChannelFactory;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,21 +19,22 @@ import com.facebook.nifty.core.ThriftServerDef;
 import com.facebook.swift.codec.ThriftCodecManager;
 import com.facebook.swift.service.ThriftEventHandler;
 import com.facebook.swift.service.ThriftServiceProcessor;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.soedomoto.dbsync.api.mode.Client;
+import com.soedomoto.dbsync.api.mode.Server;
 import com.soedomoto.dbsync.service.DBSyncDaemon;
 
-public class ThriftServer implements DBSyncDaemon.Server {
+public class ThriftServer implements Server {
 	private static final Logger log = LoggerFactory.getLogger(ThriftServer.class);
 
 	private InetAddress address;
 	private int port;
-	private DBSyncDaemon.Client[] services;
+	private Client[] services;
 	
 	private ThriftServerThread server;
 
-	public ThriftServer(InetAddress address, int port, DBSyncDaemon.Client... services) {
+	public ThriftServer(InetAddress address, int port, Client... services) {
 		this.address = address;
 		this.port = port;
 		this.services = services;
@@ -73,11 +71,11 @@ public class ThriftServer implements DBSyncDaemon.Server {
 	private static class ThriftServerThread extends Thread {
 		private InetAddress address;
 		private int port;
-		private DBSyncDaemon.Client[] services;
+		private Client[] services;
 		
 		private NettyServerTransport server;
 
-		public ThriftServerThread(InetAddress address, int port, DBSyncDaemon.Client... services) {
+		public ThriftServerThread(InetAddress address, int port, Client... services) {
 			this.address = address;
 			this.port = port;
 			this.services = services;
@@ -93,7 +91,7 @@ public class ThriftServer implements DBSyncDaemon.Server {
 				public ListenableFuture<Boolean> process(TProtocol in, TProtocol out, RequestContext requestContext)
 						throws TException {
 					SocketAddress addr = requestContext.getConnectionContext().getRemoteAddress();
-					for(DBSyncDaemon.Client client : services) {
+					for(Client client : services) {
 						client.setCurrentAddress(addr);
 					}
 					

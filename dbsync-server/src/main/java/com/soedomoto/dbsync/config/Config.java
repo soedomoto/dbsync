@@ -16,9 +16,10 @@ public class Config {
 	
 	// Configuration properties start here
 	public static boolean isClientMode = false;
+	
+	public static Config instance = new Config();
 
 	public Config() {}
-	
 	public Config(URL url) {
 		try {
 			log.info("Loading settings from {}", url);

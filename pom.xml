@@ -5,10 +5,6 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   
-  <modules>
-  	<module>dbsync-thrift</module>
-  	<module>dbsync-as</module>
-  </modules>
   
   <properties>
   	<swift.version>0.17.0</swift.version>
@@ -21,4 +17,9 @@
   		<version>${swift.version}</version>
   	</dependency>
   </dependencies>
+  <modules>
+  	<module>dbsync-api</module>
+  	<module>dbsync-provider</module>
+  	<module>dbsync-server</module>
+  </modules>
 </project>

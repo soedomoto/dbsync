@@ -6,9 +6,7 @@ import java.net.UnknownHostException;
 import com.soedomoto.dbsync.locator.DefaultEndpoint;
 import com.soedomoto.dbsync.locator.Endpoint;
 
-public class DatabaseDescriptor {
-	private static Config config;
-	
+public class DatabaseDescriptor {	
 	public static final String DEFAULT_LISTEN_ADDRESS = "127.0.0.1";
 	public static final Integer DEFAULT_LISTEN_PORT = 9999;
 	
@@ -26,10 +24,8 @@ public class DatabaseDescriptor {
 	public static void forceStaticInitialization() {}
 	static {
 		try {
-			if(Config.isClientMode) {
-				config = new Config();
-			} else {
-				config = new Config(Config.getConfigURL());
+			if(! Config.isClientMode) {
+				Config.instance = new Config(Config.getConfigURL());
 			}
 			
 			applyConfig();
@@ -39,20 +35,20 @@ public class DatabaseDescriptor {
 	}
 	
 	public static void applyConfig() throws ConfigurationException {
-		if((clusterName = config.get("cluster.name")) == null) {
+		if((clusterName = Config.instance.get("cluster.name")) == null) {
 			throw new ConfigurationException("Cluster name 'cluster.name' is not set");
 		}
 		
-		if(config.get("listen.address") != null) {
+		if(Config.instance.get("listen.address") != null) {
 			try {
-				listenAddress = InetAddress.getByName(config.get("listen.address"));
+				listenAddress = InetAddress.getByName(Config.instance.get("listen.address"));
 			} catch (UnknownHostException e) {
-				throw new ConfigurationException("Unknown listen.address '" + config.get("listen.address") + "'");
+				throw new ConfigurationException("Unknown listen.address '" + Config.instance.get("listen.address") + "'");
 			}
 			
 			if(listenAddress.isAnyLocalAddress())
 				throw new ConfigurationException("listen_address cannot be a wildcard address (" + 
-						config.get("listen.address") + ")!");
+						Config.instance.get("listen.address") + ")!");
 		} else {
 			try {
 				listenAddress = InetAddress.getByName(DEFAULT_LISTEN_ADDRESS);
@@ -61,28 +57,28 @@ public class DatabaseDescriptor {
 			}
 		}
 		
-		if(config.get("listen.port") != null) {
-			listenPort = Integer.valueOf(config.get("listen.port"));
+		if(Config.instance.get("listen.port") != null) {
+			listenPort = Integer.valueOf(Config.instance.get("listen.port"));
 		} else {
 			listenPort = DEFAULT_LISTEN_PORT;
 		}
 		
-		if(config.get("broadcast.address") != null) {
+		if(Config.instance.get("broadcast.address") != null) {
 			try {
-				broadcastAddress = InetAddress.getByName(config.get("broadcast.address"));
+				broadcastAddress = InetAddress.getByName(Config.instance.get("broadcast.address"));
 			} catch (UnknownHostException e) {
-				throw new ConfigurationException("Unknown listen.address '" + config.get("broadcast.address") + "'");
+				throw new ConfigurationException("Unknown listen.address '" + Config.instance.get("broadcast.address") + "'");
 			}
 			
 			if(broadcastAddress.isAnyLocalAddress())
 				throw new ConfigurationException("listen_address cannot be a wildcard address (" + 
-						config.get("broadcast.address") + ")!");
+						Config.instance.get("broadcast.address") + ")!");
 		} else {
 			broadcastAddress = listenAddress;
 		}
 		
-		if(config.get("endpoint.class") != null) {
-			endpoint = createEndpoint(config.get("endpoint.class"));
+		if(Config.instance.get("endpoint.class") != null) {
+			endpoint = createEndpoint(Config.instance.get("endpoint.class"));
 		} else {
 			endpoint = new DefaultEndpoint();
 		}
@@ -98,7 +94,7 @@ public class DatabaseDescriptor {
 			Class<T> cls = (Class<T>) Class.forName(classname);
 			return (T) cls;
 		} catch (ClassNotFoundException e) {
-			throw new ConfigurationException("Class '" + config.get("endpoint.class") + "' is not found in classpath");
+			throw new ConfigurationException("Class '" + Config.instance.get("endpoint.class") + "' is not found in classpath");
 		}
 	}
 	

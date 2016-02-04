@@ -6,6 +6,7 @@
   	<groupId>com.soedomoto</groupId>
   	<artifactId>dbsync</artifactId>
   	<version>0.0.1-SNAPSHOT</version>
+  	<relativePath>..</relativePath>
   </parent>
   
   <dependencies>
@@ -13,6 +14,12 @@
 		<groupId>com.soedomoto</groupId>
 		<artifactId>dbsync-api</artifactId>
 		<version>${project.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>com.soedomoto</groupId>
+		<artifactId>dbsync-provider</artifactId>
+		<version>${project.version}</version>
+		<scope>runtime</scope>
 	</dependency>
 	<dependency>
 		<groupId>commons-configuration</groupId>

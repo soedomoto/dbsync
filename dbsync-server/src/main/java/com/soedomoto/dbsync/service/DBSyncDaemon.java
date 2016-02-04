@@ -4,16 +4,18 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
 import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.soedomoto.dbsync.api.mode.Client;
+import com.soedomoto.dbsync.api.mode.Server;
+import com.soedomoto.dbsync.config.Config;
 import com.soedomoto.dbsync.config.DatabaseDescriptor;
 import com.soedomoto.dbsync.db.SystemDB;
-import com.soedomoto.dbsync.thrift.MySQL;
 import com.soedomoto.dbsync.thrift.ThriftServer;
 
 public class DBSyncDaemon {
@@ -46,22 +48,34 @@ public class DBSyncDaemon {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void setup() {
 		logSystemInfo();
 		
 		SystemDB.instance.getTokens();
 		SystemDB.instance.finishStartup();
 		
-		// Start transport
-		MySQL db = null;
+		// Create connection
+		Client db = null;
 		try {
-			db = new MySQL("jdbc:mysql://localhost/itbacademic", "root", "root");
+			Class.forName(Config.instance.get("db.driver"));
+			Class<? extends Client> clientImpl = (Class<? extends Client>) Class.forName(Config.instance.get("db.implementation"));
+			db = clientImpl.newInstance();
+			db.connect(
+				Config.instance.get("db.url"), 
+				Config.instance.get("db.properties.username"), 
+				Config.instance.get("db.properties.password"), 
+				new Properties()
+			);
 		} catch (ClassNotFoundException e) {
-			log.error("No MySQL driver found", e);
+			log.error("No driver '" + Config.instance.get("db.driver") + "' found", e);
 		} catch (SQLException e) {
 			log.error("Error in executing query", e);
+		} catch (InstantiationException | IllegalAccessException e) {
+			log.error("Error in instantiation client implementation", e);
 		}
 		
+		// Start thrift server
 		InetAddress address = DatabaseDescriptor.getListenAddress();
 		Integer port = DatabaseDescriptor.getListenPort();
 		Server thrift = new ThriftServer(address, port, db);
@@ -90,16 +104,6 @@ public class DBSyncDaemon {
 
 	public static void main(String[] args) {
 		DBSyncDaemon.instance.activate();
-	}
-	
-	public static interface Server {
-		public void start();
-		public void stop();
-		public boolean isRunning();
-	}
-	
-	public static interface Client {
-		public void setCurrentAddress(SocketAddress addr);
 	}
 	
 }
